@@ -9,11 +9,24 @@ networks:
     driver: bridge
 
 services:
+  couchdb0:
+    networks:
+      - sdk_net
+    container_name: couchdb0
+    image: hyperledger/fabric-couchdb
+    ports:
+      - "5984:5984"
+  couchdb1:
+    networks:
+      - sdk_net
+    container_name: couchdb1
+    image: hyperledger/fabric-couchdb
+    ports:
+      - "6984:5984"
   ca0:
     image: hyperledger/fabric-ca:${ARCH}-${FABRIC_PEER_FIXTURE_TAG}
     networks:
       - sdk_net
-#     network_mode: "host"
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca-org1
@@ -31,7 +44,6 @@ services:
     image: hyperledger/fabric-orderer:${ARCH}-${FABRIC_PEER_FIXTURE_TAG}
     networks:
       - sdk_net
-#    network_mode: "host"
     environment:
       - ORDERER_GENERAL_LOGLEVEL=debug
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
@@ -59,10 +71,9 @@ services:
     container_name: peer0.org1.myexample.com
     networks:
       - sdk_net
-#    extends:
-#      file: peer-base.yaml
-#      service: peer-base
     environment:
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=0.0.0.0:5984
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/peer/msp
       - CORE_LOGGING_LEVEL=DEBUG
@@ -100,10 +111,9 @@ services:
     container_name: peer1.org1.myexample.com
     networks:
       - sdk_net
-#    extends:
-#      file: peer-base.yaml
-#      service: peer-base
     environment:
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=0.0.0.0:6984
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/peer/msp
       - CORE_LOGGING_LEVEL=DEBUG
@@ -141,7 +151,7 @@ services:
       - 8052:7052
       - 8053:7053
   builder:
-    image: hyperledger/fabric-ccenv:x86_64-1.0.1
+    image: hyperledger/fabric-ccenv:${ARCH}-${FABRIC_PEER_FIXTURE_TAG}
     command: tail -F anything
 #  cli:
 #    container_name: cli
