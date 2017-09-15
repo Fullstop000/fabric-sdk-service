@@ -1,0 +1,97 @@
+#
+# Copyright SecureKey Technologies Inc. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+tls:
+  enabled: false
+
+tcert:
+  batch:
+    size: 200
+
+keystore:
+  path: /tmp/msp
+
+cryptoconfig:
+#  path: "$GOPATH/src/github.com/hyperledger/fabric/examples/my_example/crypto-config"
+  path: "src/main/resources/crypto-config"
+
+connection:
+  timeout:
+    peer:
+      endorser: 3s
+      eventHub: 3s
+      eventReg: 3s
+    orderer: 3s
+
+
+BCCSP:
+  security:
+    enabled: true
+    default:
+      provider: "SW"
+    hashAlgorithm: "SHA2"
+    softVerify: true
+    ephemeral: false
+    level: 256
+    pin: "98765432"
+    label: "ForFabric"
+    library: "/usr/lib/x86_64-linux-gnu/softhsm/libsofthsm2.so, /usr/lib/softhsm/libsofthsm2.so , /usr/lib/s390x-linux-gnu/softhsm/libsofthsm2.so, /usr/lib/powerpc64le-linux-gnu/softhsm/libsofthsm2.so, /usr/local/Cellar/softhsm/2.1.0/lib/softhsm/libsofthsm2.so"
+
+ # network provides a static definition of a Hyperledger Fabric network
+
+Organizations:
+  # Org1 name
+  Org1:
+    # domain
+    Domain: org1.myexample.com
+    # Membership Service Provider ID for this organization
+    mspID: "Org1MSP"
+    # CA config defines the fabric-ca instance that issues identities for this org
+    CA:
+      # TLS secured connections with the CA
+      tlsEnabled: false
+      # CA name
+      name: "ca-org1"
+      # CA URL. Note: https prefix required for TLS
+      serverURL: "http://127.0.0.1:7054"
+      # Configuration for mutual TLS with the CA
+    # tls:
+    #  # Comma-Separated list of paths
+    #  certfiles : "$GOPATH/src/github.com/hyperledger/fabric-sdk-go/test/fixtures/tls/fabricca/certs/ca_root.pem"
+    #  client:
+    #   keyfile: "$GOPATH/src/github.com/hyperledger/fabric-sdk-go/test/fixtures/tls/fabricca/certs/client/client_fabric_client-key.pem"
+    #   certfile: "$GOPATH/src/github.com/hyperledger/fabric-sdk-go/test/fixtures/tls/fabricca/certs/client/client_fabric_client.pem"
+
+    # Peers that are part of this organization
+    peers:
+     # Peer namecertfiles
+        peer0:
+            host: "127.0.0.1"
+            port: 7051
+            eventHost: "127.0.0.1"
+            eventPort: 7053
+            primary: true
+        peer1:
+            host: "127.0.0.1"
+            port: 8051
+            eventHost: "127.0.0.1"
+            eventPort: 8053
+            primary: true
+            #  tls:
+            #   # Certificate location absolute path
+            #   certificate: "$GOPATH/src/github.com/hyperledger/fabric/examples/my_example/crypto-config/peerOrganizations/org1.myexample.com/tlsca/tlsca.org1.example.com-cert.pem"
+            #   serverHostOverride: "peer0.org1.myexample.com"
+orderers:
+    # orderer name
+    orderer0:
+        host: "127.0.0.1"
+        port: 7050
+        # tls:
+        #  # Certificate location absolute path
+        #  certificate: "$GOPATH/src/github.com/hyperledger/fabric/examples/my_example/crypto-config/ordererOrganizations/myexample.com/tlsca/tlsca.myexample.com-cert.pem"
+        #  # For testing only: overrides the virtual host name of the authority
+        #  serverHostOverride: "orderer.myexample.com"
+        #  ap of member organizations forming the network
