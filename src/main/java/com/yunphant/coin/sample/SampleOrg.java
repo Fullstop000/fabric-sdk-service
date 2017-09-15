@@ -1,4 +1,4 @@
-package yunphant.coin.sample;
+package com.yunphant.coin.sample;
 
 import org.hyperledger.fabric.sdk.Peer;
 import org.hyperledger.fabric.sdk.User;

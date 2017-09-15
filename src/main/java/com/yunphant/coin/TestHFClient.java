@@ -1,8 +1,8 @@
-package yunphant.coin;
+package com.yunphant.coin;
 
-import yunphant.coin.sample.SampleStore;
-import yunphant.coin.sample.SampleUser;
-import yunphant.coin.utils.SDKUtils;
+import com.yunphant.coin.sample.SampleStore;
+import com.yunphant.coin.sample.SampleUser;
+import com.yunphant.coin.utils.SDKUtils;
 import org.hyperledger.fabric.sdk.HFClient;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
 

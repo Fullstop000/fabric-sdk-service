@@ -1,8 +1,8 @@
-package yunphant.coin.utils;
+package com.yunphant.coin.utils;
 
-import yunphant.coin.sample.SampleOrg;
-import yunphant.coin.sample.SampleStore;
-import yunphant.coin.sample.SampleUser;
+import com.yunphant.coin.sample.SampleOrg;
+import com.yunphant.coin.sample.SampleStore;
+import com.yunphant.coin.sample.SampleUser;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;

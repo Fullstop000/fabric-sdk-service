@@ -12,7 +12,7 @@
  *  limitations under the License.
  */
 
-package yunphant.coin.sample;
+package com.yunphant.coin.sample;
 
 import io.netty.util.internal.StringUtil;
 import org.bouncycastle.util.encoders.Hex;

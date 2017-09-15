@@ -12,7 +12,7 @@
  *  limitations under the License.
  */
 
-package yunphant.coin.sample;
+package com.yunphant.coin.sample;
 
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;

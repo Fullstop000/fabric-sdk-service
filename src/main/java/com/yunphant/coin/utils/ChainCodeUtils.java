@@ -1,4 +1,4 @@
-package yunphant.coin.utils;
+package com.yunphant.coin.utils;
 
 import org.hyperledger.fabric.sdk.*;
 import org.hyperledger.fabric.sdk.exception.InvalidArgumentException;
