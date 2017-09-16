@@ -49,9 +49,10 @@ public class ChainCodeUtils {
         tm.put("HyperLedgerFabric", "InstantiateProposalRequest:JavaSDK".getBytes(UTF_8));
         tm.put("method", "InstantiateProposalRequest".getBytes(UTF_8));
         request.setTransientMap(tm);
-        ChaincodeEndorsementPolicy policy = new ChaincodeEndorsementPolicy();
-        policy.fromStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("ccEndorsementPolicy.yaml"));
-        request.setChaincodeEndorsementPolicy(policy);
+        // TODO: 2017/9/16 something wrong in policy when invoking `addCoinTransaction` temporarily
+//        ChaincodeEndorsementPolicy policy = new ChaincodeEndorsementPolicy();
+//        policy.fromStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("ccEndorsementPolicy.yaml"));
+//        request.setChaincodeEndorsementPolicy(policy);
         return request;
     }
     /**
