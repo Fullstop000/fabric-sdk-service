@@ -32,6 +32,12 @@ sourceSets {
 }
 dependencies {
     // This dependency is found on compile classpath of this component and consumers.
+    // https://mvnrepository.com/artifact/com.jsoniter/jsoniter
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-text
+    compile group: 'org.apache.commons', name: 'commons-text', version: '1.1'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
+    compile group: 'com.jsoniter', name: 'jsoniter', version: '0.9.15'
     compile 'com.google.guava:guava:22.0'
     compile 'org.hyperledger.fabric-sdk-java:fabric-sdk-java:1.1.0-SNAPSHOT'
     compile group: 'org.yaml', name: 'snakeyaml', version: '1.17'
