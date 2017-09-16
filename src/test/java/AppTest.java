@@ -3,6 +3,7 @@
  */
 
 import com.yunphant.coin.TestHFClient;
+import com.yunphant.coin.models.CoinTransaction;
 import com.yunphant.coin.sample.SampleOrg;
 import com.yunphant.coin.utils.ChainCodeUtils;
 import com.yunphant.coin.utils.SDKUtils;
@@ -31,7 +32,7 @@ public class AppTest {
     @Before
     public void init() throws Exception {
         client = TestHFClient.getInstance().getClient();
-        testCCId = ChaincodeID.newBuilder().setName("yunphantCoinCCTest1").setPath("com/yunphant/coin").setVersion("0.1").build();
+        testCCId = ChaincodeID.newBuilder().setName("yunphantCoinCC").setPath("yunphant/coin").setVersion("0.1").build();
     }
 
     @Test
@@ -93,13 +94,11 @@ public class AppTest {
             }
         });
         InstantiateProposalRequest request = ChainCodeUtils.demoCCInstantiateProposal(client,testCCId);
-        request.setArgs(new String[] {"a" , "100"});
-        // instantiate 时 args 会默认添加 "init" 作为第一个参数
+        request.setArgs(new String[] {"a"});
         channel.sendTransaction(channel.sendInstantiationProposal(request)).thenApply(transactionEvent->{
             Assert.assertTrue(transactionEvent.isValid());
-            String tx = transactionEvent.getTransactionID();
             try {
-                TransactionInfo txInfo = channel.queryTransactionByID(tx);
+                TransactionInfo txInfo = channel.queryTransactionByID(transactionEvent.getTransactionID());
                 Assert.assertNotNull(txInfo);
             } catch (ProposalException | InvalidArgumentException e) {
                 Assert.fail();
@@ -109,7 +108,7 @@ public class AppTest {
     }
 
     @Test
-    public void testInvokeChainCode() throws Exception {
+    public void testInvokeChainCode_addCoinTransaction() throws Exception {
         SampleOrg org = SDKUtils.getSampleOrg(client);
         Channel channel = SDKUtils.constructChannel(true,"mychannel",client,org);
 //       TransactionRequest is  A base transaction request common for InstallProposalRequest,trRequest, and QueryRequest
@@ -122,8 +121,8 @@ public class AppTest {
         });
         TransactionProposalRequest request = client.newTransactionProposalRequest();
         request.setChaincodeID(testCCId);
-        request.setFcn("get");
-        request.setArgs(new String[]{"a"});
+        request.setFcn("addCoinTransaction");
+        request.setArgs(new String[]{CoinTransaction.genRandom().toJsonStr()});
         request.setProposalWaitTime(PROPOSAL_WAIT_TIME);
         Map<String, byte[]> map = new HashMap<>();
         map.put("HyperLedgerFabric", "TransactionProposalRequest:JavaSDK".getBytes(UTF_8)); //Just some extra junk in transient map
@@ -131,14 +130,31 @@ public class AppTest {
 //        map.put("result", ":)".getBytes(UTF_8));  // This should be returned see chaincode why.
 //        map.put("event", "!".getBytes(UTF_8));  //This should trigger an event see chaincode why.
         request.setTransientMap(map);
-        channel.sendTransactionProposal(request).forEach(response ->{
-            String result = response.getProposalResponse().getResponse().getPayload().toStringUtf8();
-            Assert.assertEquals("100",result);
+        Collection<ProposalResponse> responses = channel.sendTransactionProposal(request,channel.getPeers());
+        responses.forEach(response -> {
+            if (response.getStatus() != ProposalResponse.Status.SUCCESS){
+                Assert.fail("Fail to send transaction. ");
+            }
+            LOGGER.info(response.getProposalResponse().getResponse().getPayload().toStringUtf8());
+        });
+        channel.sendTransaction(responses).thenApply(transactionEvent -> {
+            try {
+                if (transactionEvent.isValid()){
+                    TransactionInfo txInfo = channel.queryTransactionByID(transactionEvent.getTransactionID());
+                    Assert.assertNotNull(txInfo);
+                }else{
+                    Assert.fail();
+                }
+
+            } catch (ProposalException | InvalidArgumentException e) {
+                Assert.fail();
+            }
+            return null;
         });
     }
-
     @Test
-    public void testChannelQuery() throws Exception {
+    public void testInvokeChainCode_query() throws Exception {
+        String queryStr = "{ \"selector\": {\"type\":{\"$gt\":null}}}";
         SampleOrg org = SDKUtils.getSampleOrg(client);
         Channel channel = SDKUtils.constructChannel(true,"mychannel",client,org);
         org.getPeers().forEach(peer -> {
@@ -148,11 +164,18 @@ public class AppTest {
                 Assert.fail();
             }
         });
-        byte[] currentBlockHash = channel.queryBlockchainInfo().getBlockchainInfo().getCurrentBlockHash().toByteArray();
-//        channel.queryBlockByHash(currentBlockHash).
-        long blockHeight = channel.queryBlockchainInfo().getHeight();
-//        LOGGER.info(currentBlockHash);
-        LOGGER.info(String.valueOf(blockHeight));
+        TransactionProposalRequest request = client.newTransactionProposalRequest();
+        request.setChaincodeID(testCCId);
+        request.setFcn("query");
+        request.setArgs(new String[]{queryStr});
+        request.setProposalWaitTime(PROPOSAL_WAIT_TIME);
+        Map<String, byte[]> map = new HashMap<>();
+        map.put("HyperLedgerFabric", "TransactionProposalRequest:JavaSDK".getBytes(UTF_8)); //Just some extra junk in transient map
+        map.put("method", "TransactionProposalRequest".getBytes(UTF_8)); // ditto
 
+        request.setTransientMap(map);
+        channel.sendTransactionProposal(request,Collections.singleton(channel.getPeers().iterator().next())).forEach(response -> {
+            LOGGER.info(response.getProposalResponse().getResponse().getPayload().toStringUtf8());
+        });
     }
 }
