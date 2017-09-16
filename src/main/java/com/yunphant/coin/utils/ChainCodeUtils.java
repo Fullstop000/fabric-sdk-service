@@ -50,7 +50,7 @@ public class ChainCodeUtils {
         tm.put("method", "InstantiateProposalRequest".getBytes(UTF_8));
         request.setTransientMap(tm);
         ChaincodeEndorsementPolicy policy = new ChaincodeEndorsementPolicy();
-        policy.fromStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("ccEndoresementPolicy.yaml"));
+        policy.fromStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("ccEndorsementPolicy.yaml"));
         request.setChaincodeEndorsementPolicy(policy);
         return request;
     }
