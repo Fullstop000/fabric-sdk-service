@@ -70,15 +70,8 @@ func (coinTransaction *CoinTransaction) query(stub shim.ChaincodeStubInterface, 
 		if bArrayMemberAlreadyWritten == true {
 			buffer.WriteString(",")
 		}
-		buffer.WriteString("{\"Key\":")
-		buffer.WriteString("\"")
-		buffer.WriteString(queryResponse.Key)
-		buffer.WriteString("\"")
-
-		buffer.WriteString(", \"Record\":")
 		// Record is a JSON object, so we write as-is
 		buffer.WriteString(string(queryResponse.Value))
-		buffer.WriteString("}")
 		bArrayMemberAlreadyWritten = true
 	}
 	buffer.WriteString("]")
