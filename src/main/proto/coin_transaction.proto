@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.yunphant.cointransaction.grpc.cointransaction";
+option java_outer_classname = "CoinTransactionProto";
+option objc_class_prefix = "RTG";
+
+package cointransaction;
+
+// The coin transaction struct for both chaincode , client and SDK service
+message RPCCoinTransaction {
+    string sender = 1;
+    string receiver = 2;
+    double sender_balance = 3;
+    double receiver_balance = 4;
+    double amount = 5;
+    string type = 6;
+    int64 timestamp = 7;
+
+}
+
+// The query request
+message QueryRequest {
+    string query_string = 1; // use CouchDB query json format
+}
+message WriteRequest {
+    repeated RPCCoinTransaction payload = 1;
+}
+// The service response
+message CoinSDKServiceResponse {
+    string message = 1;
+    enum Status {
+        success = 0;
+        other = 5;
+        error = 9;
+    }
+    Status status = 2;
+    // if QueryRequest the payload is a json str encoded by go json lib
+    string payload = 3;
+}
+service CoinTransaction {
+
+    // Create a coin transaction record in fabric network
+    rpc CreateTransaction(WriteRequest) returns (CoinSDKServiceResponse) {}
+
+    // Query the transaction info from fabric
+    rpc QueryTransaction(QueryRequest) returns (CoinSDKServiceResponse) {}
+
+}
