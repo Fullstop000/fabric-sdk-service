@@ -8,10 +8,11 @@
 
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
-
+apply plugin: 'com.google.protobuf'
 // Apply the application plugin to add support for building an application
 apply plugin: 'application'
-
+apply plugin: 'idea'
+def grpcVersion = '1.6.1' // CURRENT_GRPC_VERSION
 // In this section you declare where to find the dependencies of your project
 repositories {
     maven {url 'http://maven.aliyun.com/nexus/content/groups/public/'}
@@ -19,6 +20,14 @@ repositories {
     mavenLocal()
     mavenCentral()
     jcenter()
+}
+idea {
+    module {
+        // Not using generatedSourceDirs because of
+        // https://discuss.gradle.org/t/support-for-intellij-2016/15294/8
+        sourceDirs += file("${projectDir}/build/generated/source/proto/main/java");
+        sourceDirs += file("${projectDir}/build/generated/source/proto/main/grpc");
+    }
 }
 sourceSets {
     main {
@@ -30,11 +39,40 @@ sourceSets {
         }
     }
 }
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        // ASSUMES GRADLE 2.12 OR HIGHER. Use plugin version 0.7.5 with earlier
+        // gradle versions
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.1'
+    }
+}
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.4.0'
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {
+                // To generate deprecated interfaces and static bindService method,
+                // turn the enable_deprecated option to true below:
+                option 'enable_deprecated=false'
+            }
+        }
+    }
+}
 dependencies {
-    // This dependency is found on compile classpath of this component and consumers.
-    // https://mvnrepository.com/artifact/com.jsoniter/jsoniter
-    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
-    // https://mvnrepository.com/artifact/org.apache.commons/commons-text
+    compile "com.google.api.grpc:proto-google-common-protos:0.1.9"
+    compile "io.grpc:grpc-netty:${grpcVersion}"
+    compile "io.grpc:grpc-protobuf:${grpcVersion}"
+    compile "io.grpc:grpc-stub:${grpcVersion}"
     compile group: 'org.apache.commons', name: 'commons-text', version: '1.1'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
     compile group: 'com.jsoniter', name: 'jsoniter', version: '0.9.15'
@@ -48,6 +86,7 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.8.2'
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
+    testCompile "io.grpc:grpc-testing:${grpcVersion}"
 }
 
 // Define the main class for the application
