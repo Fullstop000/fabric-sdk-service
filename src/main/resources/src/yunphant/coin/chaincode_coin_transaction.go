@@ -11,9 +11,9 @@ import (
 
 type CoinTransaction struct {
 	// transaction sender
-	Sender string `json:"sender"`
+	Sender int `json:"sender"`
 	// transaction receiver
-	Receiver string `json:"receiver"`
+	Receiver int `json:"receiver"`
 	// sender balance
 	SenderBalance float64 `json:"senderBalance"`
 	// receiver balance
@@ -81,7 +81,7 @@ func (coinTransaction *CoinTransaction) query(stub shim.ChaincodeStubInterface, 
 
 func (coinTransaction *CoinTransaction) addCoinTransaction(stub shim.ChaincodeStubInterface) peer.Response {
 	key, err := stub.CreateCompositeKey(coinTransaction.Type,
-		[]string{coinTransaction.Sender, coinTransaction.Receiver, strconv.FormatInt(coinTransaction.Timestamp, 10)})
+		[]string{strconv.Itoa(coinTransaction.Sender), strconv.Itoa(coinTransaction.Receiver), strconv.FormatInt(coinTransaction.Timestamp, 10)})
 	if err != nil {
 		shim.Error(fmt.Sprintf("Error generate composite key from CoinTransaction : %v , err : %e", coinTransaction, err))
 	}
