@@ -16,18 +16,25 @@ import org.hyperledger.fabric.sdk.exception.TransactionException;
 import org.hyperledger.fabric.sdk.helper.Utils;
 import org.hyperledger.fabric_ca.sdk.HFCAClient;
 import org.hyperledger.fabric_ca.sdk.RegistrationRequest;
+import org.hyperledger.fabric_ca.sdk.exception.EnrollmentException;
+import org.hyperledger.fabric_ca.sdk.exception.RegistrationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static com.yunphant.coin.common.CommonUtils.logError;
 import static java.lang.String.format;
 
 public class SDKUtils {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SDKUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(SDKUtils.class);
 
     public static InputStream generateTarGzInputStream(File src, String pathPrefix) throws IOException {
 
@@ -72,7 +79,7 @@ public class SDKUtils {
     }
 
     // TODO: 2017/9/12 read config from config.yaml
-    public static SampleOrg getSampleOrg(HFClient client) throws Exception {
+    public static SampleOrg getSampleOrg(HFClient client) {
         // read from config.yaml
         boolean tlsEnabled = false;
         String mspId = "Org1MSP";
@@ -89,8 +96,13 @@ public class SDKUtils {
 //            org.setCAProperties();
             org.setCALocation(org.getCALocation().replaceAll("^http://", "https://"));
         }
-        HFCAClient hfcaClient = HFCAClient.createNewInstance(org.getCAName(), org.getCALocation(), org.getCAProperties());
-        hfcaClient.setCryptoSuite(client.getCryptoSuite());
+        HFCAClient hfcaClient = null;
+        try {
+            hfcaClient = HFCAClient.createNewInstance(org.getCAName(), org.getCALocation(), org.getCAProperties());
+            hfcaClient.setCryptoSuite(client.getCryptoSuite());
+        } catch (MalformedURLException | org.hyperledger.fabric_ca.sdk.exception.InvalidArgumentException e) {
+            logError(logger,"Error create ca client",e);
+        }
         org.setCAClient(hfcaClient);
         org.setDomainName("org1.myexample.com");
 
@@ -98,10 +110,14 @@ public class SDKUtils {
          * Peer config
          * add peer instances or  peer configs ( name and grpc location)
          */
-        Arrays.asList(
-                client.newPeer("peer0.org1.myexample.com", "grpc://localhost:7051"),
-                client.newPeer("peer1.org1.myexample.com", "grpc://localhost:8051")
-        ).forEach(org::addPeer);
+        try {
+            Arrays.asList(
+                    client.newPeer("peer0.org1.myexample.com", "grpc://localhost:7051"),
+                    client.newPeer("peer1.org1.myexample.com", "grpc://localhost:8051")
+            ).forEach(org::addPeer);
+        } catch (InvalidArgumentException e) {
+            logError(logger,"Error creating peer objects",e);
+        }
 
         /*
          * Orderer config
@@ -114,20 +130,31 @@ public class SDKUtils {
         org.addEventHubLocation("peer1.org1.myexmaple.com", "grpc://localhost:8053");
 
         // temp file
-        File tempFile = File.createTempFile("teststore", "properties");
+        File tempFile = null;
+        try {
+            tempFile = File.createTempFile("teststore", "properties");
+        } catch (IOException e) {
+            logError(logger,"Fail to create tmp file teststore.properties");
+        }
         tempFile.deleteOnExit();
 
         File sampleStoreFile = new File(System.getProperty("user.dir") + "/" + orgName + ".properties");
 //        if (sampleStoreFile.exists()) { //For testing start fresh
 //            boolean isDeleted = sampleStoreFile.delete();
 //            if (!isDeleted) {
-//                LOGGER.error("Fail to delete sample store file");
+//                logger.error("Fail to delete sample store file");
 //            }
 //        }
         final SampleStore sampleStore = new SampleStore(sampleStoreFile);
         SampleUser admin = sampleStore.getMember("admin", orgName);
         if (!admin.isEnrolled()) {  //Preregistered admin only needs to be enrolled with Fabric caClient.
-            admin.setEnrollment(hfcaClient.enroll(admin.getName(), "adminpw"));
+            try {
+                if (hfcaClient != null) {
+                    admin.setEnrollment(hfcaClient.enroll(admin.getName(), "adminpw"));
+                }
+            } catch (EnrollmentException | org.hyperledger.fabric_ca.sdk.exception.InvalidArgumentException e) {
+                logError(logger,"Error enrolling admin user of org "+orgName,e);
+            }
             admin.setMspId(mspId);
         }
         org.setAdmin(admin);
@@ -135,19 +162,41 @@ public class SDKUtils {
         /*
          *  Peer admin use to create channels, join peers and install chaincode
          */
-        SampleUser peerAdmin = sampleStore.getMember("org1Admin", orgName, mspId,
-                findFileSk("src/main/resources/crypto-config/peerOrganizations/org1.myexample.com/users/Admin@org1.myexample.com/msp/keystore"),
-                new File("src/main/resources/crypto-config/peerOrganizations/org1.myexample.com/users/Admin@org1.myexample.com/msp/signcerts/Admin@org1.myexample.com-cert.pem"));
+        SampleUser peerAdmin = null;
+        try {
+            peerAdmin = sampleStore.getMember("org1Admin", orgName, mspId,
+                    findFileSk("src/main/resources/crypto-config/peerOrganizations/org1.myexample.com/users/Admin@org1.myexample.com/msp/keystore"),
+                    new File("src/main/resources/crypto-config/peerOrganizations/org1.myexample.com/users/Admin@org1.myexample.com/msp/signcerts/Admin@org1.myexample.com-cert.pem"));
+        } catch (IOException | NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
+            logError(logger,"Error get member org1Admin from sample store",e);
+        }
         org.setPeerAdmin(peerAdmin);
 
         SampleUser user = sampleStore.getMember("User2", orgName);
         if (!user.isRegistered()) {  // users need to be registered AND enrolled
-            RegistrationRequest rr = new RegistrationRequest(user.getName(), "org1.department1");
-            user.setEnrollmentSecret(hfcaClient.register(rr, admin));
+            RegistrationRequest rr = null;
+            try {
+                rr = new RegistrationRequest(user.getName(), "org1.department1");
+            } catch (Exception e) {
+                logError(logger,"Error");
+            }
+            try {
+                if (hfcaClient != null && rr != null) {
+                    user.setEnrollmentSecret(hfcaClient.register(rr, admin));
+                }
+            } catch (RegistrationException | org.hyperledger.fabric_ca.sdk.exception.InvalidArgumentException e) {
+                e.printStackTrace();
+            }
             user.saveState();
         }
         if (!user.isEnrolled()) {
-            user.setEnrollment(hfcaClient.enroll(user.getName(), user.getEnrollmentSecret()));
+            try {
+                if (hfcaClient != null) {
+                    user.setEnrollment(hfcaClient.enroll(user.getName(), user.getEnrollmentSecret()));
+                }
+            } catch (EnrollmentException | org.hyperledger.fabric_ca.sdk.exception.InvalidArgumentException e) {
+                e.printStackTrace();
+            }
             user.setMspId(mspId);
         }
         org.addUser(user); //Remember user belongs to this Org
@@ -159,8 +208,6 @@ public class SDKUtils {
 
         Collection<Orderer> orderers = new LinkedList<>();
         for (String orderName : org.getOrdererNames()) {
-
-//            Properties ordererProperties = testConfig.getOrdererProperties(orderName);
             Properties ordererProperties = new Properties();
             ordererProperties.put("ordererWaitTimeMilliSecs","10000");
             //example of setting keepAlive to avoid timeouts on inactive http2 connections.
@@ -188,7 +235,7 @@ public class SDKUtils {
         // If channel creation policy needed more signature they would need to be added too.
 //
         newChannel.addOrderer(anOrderer);
-        LOGGER.info(format("Created channel %s", channelName));
+        logger.info(format("Created channel %s", channelName));
         for (Orderer orderer : orderers) { //add remaining orderers if any.
             newChannel.addOrderer(orderer);
         }
