@@ -33,18 +33,21 @@ type CoinTransaction struct {
 	//todo add goods info
 }
 
-func createTransaction() {
+var client CoinTransactionClient
+var conn *grpc.ClientConn
+func init() {
 	var opts []grpc.DialOption
 	//todo add TLS support
 	opts = append(opts,grpc.WithInsecure())
-	conn , err := grpc.Dial(fmt.Sprintf("%s:%d",SERVER_ADD,SERVER_PORT),opts...)
+	var err error
+	conn , err = grpc.Dial(fmt.Sprintf("%s:%d",SERVER_ADD,SERVER_PORT),opts...)
 	if err != nil {
 		log.Fatalf("Error dialing %s:%d : %e",SERVER_ADD,SERVER_PORT,err)
 	}
+	client = NewCoinTransactionClient(conn)
+}
+func createTransaction() {
 	defer conn.Close()
-
-	client := NewCoinTransactionClient(conn)
-
 	// test create transaction
 	createStr, err := json.Marshal(&CoinTransaction{
 		Sender:"testSender",
@@ -66,16 +69,7 @@ func createTransaction() {
 }
 
 func queryTransaction()  {
-	var opts []grpc.DialOption
-	//todo add TLS support
-	opts = append(opts,grpc.WithInsecure())
-	conn , err := grpc.Dial(fmt.Sprintf("%s:%d",SERVER_ADD,SERVER_PORT),opts...)
-	if err != nil {
-		log.Fatalf("Error dialing %s:%d : %e",SERVER_ADD,SERVER_PORT,err)
-	}
 	defer conn.Close()
-	client := NewCoinTransactionClient(conn)
-
 	// test query transaction
 	queryStr := "{ \"selector\": {\"type\":{\"$gt\":null}}}"
 	response, err :=client.QueryTransaction(context.Background(),&QueryRequest{queryStr})
