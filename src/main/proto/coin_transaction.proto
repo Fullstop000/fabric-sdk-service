@@ -22,12 +22,14 @@ package main;
 // The query request
 message QueryRequest {
     string query_string = 1; // use CouchDB query json format
+    string orgID = 2;
 }
 
 // The write request
 message WriteRequest {
     // use json to simplified the RPC service level
     string jsonStr = 1;
+    string orgID = 2;
 //    repeated RPCCoinTransaction payload = 1;
 }
 
