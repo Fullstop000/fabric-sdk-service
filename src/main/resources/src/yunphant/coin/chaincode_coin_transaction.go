@@ -124,6 +124,9 @@ func (c *YunphantCoinCC) addCoinTransaction(stub shim.ChaincodeStubInterface,coi
 		if err !=nil {
 			shim.Error(fmt.Sprintf("Error getting sender balance by id : %s , err : %s",senderId,err.Error()))
 		}
+		if senderBalanceBytes == nil {
+			shim.Error(fmt.Sprintf("No account found for sender %s",senderId))
+		}
 		senderBalance, err := strconv.ParseInt(string(senderBalanceBytes[:]),10,64)
 		if err != nil {
 			shim.Error(fmt.Sprintf("Error parsing sender balance to int64 number : %s",err.Error()))
@@ -143,6 +146,9 @@ func (c *YunphantCoinCC) addCoinTransaction(stub shim.ChaincodeStubInterface,coi
 	receiverBalanceBytes, err := stub.GetState(receiverId)
 	if err!= nil {
 		shim.Error(fmt.Sprintf("Error getting receiver balance by id : %s , err : %s",senderId,err.Error()))
+	}
+	if receiverBalanceBytes == nil {
+		shim.Error(fmt.Sprintf("No account found for receiver %s",receiverId))
 	}
 	receiverBalance, err := strconv.ParseInt(string(receiverBalanceBytes[:]),10,64)
 	if err != nil {
