@@ -51,4 +51,7 @@ service CoinTransaction {
     // Query the transaction info from fabric
     rpc QueryTransaction(QueryRequest) returns (CoinSDKServiceResponse) {}
 
+    // Create a account for certain user
+    rpc CreateAccount(WriteRequest) returns (CoinSDKServiceResponse) {}
+
 }
