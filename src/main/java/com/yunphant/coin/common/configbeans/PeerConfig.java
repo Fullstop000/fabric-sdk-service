@@ -27,4 +27,7 @@ public class PeerConfig extends BasePeerConfig {
         this.domain = domain;
     }
 
+    public String getEventHubAddress() {
+        return this.getHost() + ":" +this.getPort().substring(0,this.getPort().length()-1)+"3";
+    }
 }

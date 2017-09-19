@@ -2,14 +2,11 @@ package com.yunphant.coin.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.yunphant.coin.common.configbeans.OrdererConfig;
-import com.yunphant.coin.common.configbeans.OrganizationConfig;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import com.yunphant.coin.common.configbeans.FabricConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.Serializable;
 
 import static com.yunphant.coin.common.CommonUtils.logError;
 
@@ -64,71 +61,4 @@ public class FabricConfigHelper {
     }
 }
 
-/**
- * The type Fabric config.
- */
-class FabricConfig implements Serializable{
-    private static final long serialVersionUID = 2425641123495817910L;
-    private OrdererConfig ordererConfig;
-    private String orgDirPrefix;
-    private OrganizationConfig[] organizations;
 
-    /**
-     * Gets orderer config.
-     *
-     * @return the orderer config
-     */
-    public OrdererConfig getOrdererConfig() {
-        return ordererConfig;
-    }
-
-    /**
-     * Sets orderer config.
-     *
-     * @param ordererConfig the orderer config
-     */
-    public void setOrdererConfig(OrdererConfig ordererConfig) {
-        this.ordererConfig = ordererConfig;
-    }
-
-    /**
-     * Gets org dir prefix.
-     *
-     * @return the org dir prefix
-     */
-    public String getOrgDirPrefix() {
-        return orgDirPrefix;
-    }
-
-    /**
-     * Sets org dir prefix.
-     *
-     * @param orgDirPrefix the org dir prefix
-     */
-    public void setOrgDirPrefix(String orgDirPrefix) {
-        this.orgDirPrefix = orgDirPrefix;
-    }
-
-    /**
-     * Get organizations organization config [ ].
-     *
-     * @return the organization config [ ]
-     */
-    public OrganizationConfig[] getOrganizations() {
-        return organizations;
-    }
-
-    /**
-     * Sets organizations.
-     *
-     * @param organizations the organizations
-     */
-    public void setOrganizations(OrganizationConfig[] organizations) {
-        this.organizations = organizations;
-    }
-
-    @Override
-    public String toString() {
-        return ReflectionToStringBuilder.toString(this);
-    }
-}

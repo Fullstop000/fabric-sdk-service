@@ -64,4 +64,8 @@ public class BasePeerConfig implements Serializable {
     public void setPort(String port) {
         this.port = port;
     }
+
+    public String getAddress(){
+        return this.host+":"+this.port;
+    }
 }

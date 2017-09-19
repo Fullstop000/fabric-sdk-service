@@ -1,6 +1,7 @@
 package com.yunphant.coin.common.configbeans;
 
 import java.io.Serializable;
+import java.nio.file.Paths;
 
 /**
  * The type Organization config.
@@ -101,5 +102,15 @@ public class OrganizationConfig implements Serializable {
      */
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+//    src/main/resources/crypto-config/peerOrganizations/org0.yunphant.coin.com/users/Admin@org0.yunphant.coin.com/msp/keystore
+    public String getAdminPrivateKey(String prefix){
+        return Paths.get(prefix,this.domain,"users","Admin@"+this.domain,"msp","keystore").toString();
+    }
+
+//    src/main/resources/crypto-config/peerOrganizations/org0.yunphant.coin.com/users/Admin@org0.yunphant.coin.com/msp/signcerts/Admin@org0.yunphant.coin.com-cert.pem
+    public String getAdminCert(String prefix){
+        return Paths.get(prefix,this.domain,"users","Admin@"+this.domain,"msp","signcerts","Admin@"+this.domain+"-cert.pem").toString();
     }
 }
