@@ -26,7 +26,7 @@ type CoinTransaction struct {
 
 type UserBalance struct {
 	// user id
-	UserId int `json:"userId"`
+	UserID int `json:"userID"`
 
 	// user balance
 	Balance int64 `json:"balance"`
@@ -45,12 +45,17 @@ func (c *YunphantCoinCC) Invoke(stub shim.ChaincodeStubInterface) peer.Response 
 	function, args := stub.GetFunctionAndParameters()
 	switch function {
 	case "createAccount":
-		return c.createAccount(stub, args[0])
+		var userBalance UserBalance
+		err := json.Unmarshal([]byte(args[0]), &userBalance)
+		if err != nil {
+			shim.Error(fmt.Sprintf("Erroring unmarshal string to UserBalance : %s ,err : %s",args[0],err.Error()))
+		}
+		return c.createAccount(stub, strconv.Itoa(userBalance.UserID))
 	case "addCoinTransaction":
 		var coinTran CoinTransaction
 		err := json.Unmarshal([]byte(args[0]), &coinTran)
 		if err != nil {
-			shim.Error(fmt.Sprintf("Erroring unmarshal string to CoinTransaction : %s ,err : %e",args[0],err))
+			shim.Error(fmt.Sprintf("Erroring unmarshal string to CoinTransaction : %s ,err : %s",args[0],err.Error()))
 		}
 		return c.addCoinTransaction(stub,&coinTran)
 	case "query":
@@ -65,7 +70,7 @@ func (c *YunphantCoinCC) Invoke(stub shim.ChaincodeStubInterface) peer.Response 
 func (c *YunphantCoinCC) query(stub shim.ChaincodeStubInterface, queryStr string ) peer.Response {
 	res, err := stub.GetQueryResult(queryStr)
 	if err != nil {
-		shim.Error(fmt.Sprintf("Erroring query couchDB by query string : %s , err : %e",queryStr , err))
+		shim.Error(fmt.Sprintf("Erroring query couchDB by query string : %s , err : %s",queryStr , err.Error()))
 	}
 	bArrayMemberAlreadyWritten := false
 	var buffer bytes.Buffer
@@ -113,22 +118,26 @@ func (c *YunphantCoinCC) addCoinTransaction(stub shim.ChaincodeStubInterface,coi
 	amount := coinTransaction.Amount
 
 	// update the sender balance and calculate
-	senderBalanceBytes,err := stub.GetState(senderId)
-	if err !=nil {
-		shim.Error(fmt.Sprintf("Error getting sender balance by id : %s , err : %s",senderId,err.Error()))
-	}
-	senderBalance, err := strconv.ParseInt(string(senderBalanceBytes[:]),10,64)
-	if err != nil {
-		shim.Error(fmt.Sprintf("Error parsing sender balance to int64 number : %s",err.Error()))
+	if coinTransaction.Type != "issue" {
+		// The type `issue` is mapping to the grant operation of admin
+		senderBalanceBytes,err := stub.GetState(senderId)
+		if err !=nil {
+			shim.Error(fmt.Sprintf("Error getting sender balance by id : %s , err : %s",senderId,err.Error()))
+		}
+		senderBalance, err := strconv.ParseInt(string(senderBalanceBytes[:]),10,64)
+		if err != nil {
+			shim.Error(fmt.Sprintf("Error parsing sender balance to int64 number : %s",err.Error()))
+		}
+
+		if senderBalance=senderBalance - amount ; senderBalance < 0  {
+			shim.Error(fmt.Sprint("Do not have enough balance !"))
+		}
+		err = stub.PutState(senderId, []byte(strconv.FormatInt(senderBalance,10)))
+		if err != nil {
+			shim.Error(fmt.Sprintf("Error update sender balance : %s",err.Error()))
+		}
 	}
 
-	if senderBalance=senderBalance - amount ; senderBalance < 0  {
-		shim.Error(fmt.Sprint("Do not have enough balance !"))
-	}
-	err = stub.PutState(senderId, []byte(strconv.FormatInt(senderBalance,10)))
-	if err != nil {
-		shim.Error(fmt.Sprintf("Error update sender balance : %s",err.Error()))
-	}
 
 	// update the receiver balance
 	receiverBalanceBytes, err := stub.GetState(receiverId)
@@ -140,7 +149,7 @@ func (c *YunphantCoinCC) addCoinTransaction(stub shim.ChaincodeStubInterface,coi
 		shim.Error(fmt.Sprintf("Error parsing receiver balance to int64 number : %s",err.Error()))
 	}
 	receiverBalance += amount
-	err = stub.PutState(receiverId,[]byte(receiverBalance))
+	err = stub.PutState(receiverId,[]byte(strconv.FormatInt(receiverBalance,10)))
 	if err != nil {
 		shim.Error(fmt.Sprintf("Error update receiver balance : %s",err.Error()))
 	}
