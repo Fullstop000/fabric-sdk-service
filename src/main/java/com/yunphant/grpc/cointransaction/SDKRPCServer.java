@@ -23,7 +23,7 @@ import java.io.IOException;
 import static com.yunphant.coin.common.CommonUtils.logError;
 
 /**
- * The type Sdkrpc server.
+ * The type SDK rpc server.
  */
 public class SDKRPCServer extends CommonRPCServer{
 
@@ -78,7 +78,6 @@ public class SDKRPCServer extends CommonRPCServer{
             } finally {
                 responseObserver.onCompleted();
             }
-
         }
 
         /**
