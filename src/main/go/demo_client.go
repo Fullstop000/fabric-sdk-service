@@ -61,7 +61,7 @@ func createTransaction() {
 	if err != nil {
 		fmt.Errorf("error marshaling CoinTransaction")
 	}
-	response,err := client.CreateTransaction(context.Background(),&WriteRequest{string(createStr[:])})
+	response,err := client.CreateTransaction(context.Background(),&WriteRequest{string(createStr[:]),"1"})
 	if err != nil {
 		fmt.Errorf("error creating transaction : %s",err.Error())
 	}
@@ -72,7 +72,7 @@ func queryTransaction()  {
 	defer conn.Close()
 	// test query transaction
 	queryStr := "{ \"selector\": {\"type\":{\"$gt\":null}}}"
-	response, err :=client.QueryTransaction(context.Background(),&QueryRequest{queryStr})
+	response, err :=client.QueryTransaction(context.Background(),&QueryRequest{queryStr,"1"})
 	if err != nil {
 		fmt.Errorf("error QueryTransaction : %s" , err.Error())
 	}
