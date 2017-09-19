@@ -1,14 +1,9 @@
 package com.yunphant.coin.models;
 
 import com.jsoniter.output.JsonStream;
-import org.apache.commons.codec.binary.StringUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.apache.commons.text.RandomStringGenerator;
-import org.bouncycastle.pqc.math.linearalgebra.RandUtils;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 
 
 /**
@@ -18,15 +13,11 @@ public class CoinTransaction implements Serializable{
 
     private static final long serialVersionUID = 8156282684875921996L;
 
-    private String sender;
+    private int sender;
 
-    private String receiver;
+    private int receiver;
 
-    private double senderBalance;
-
-    private double receiverBalance;
-
-    private double amount;
+    private long amount;
 
     private String type;
 
@@ -37,7 +28,7 @@ public class CoinTransaction implements Serializable{
      *
      * @return the sender
      */
-    public String getSender() {
+    public int getSender() {
         return sender;
     }
 
@@ -46,7 +37,7 @@ public class CoinTransaction implements Serializable{
      *
      * @param sender the sender
      */
-    public void setSender(String sender) {
+    public void setSender(int sender) {
         this.sender = sender;
     }
 
@@ -55,7 +46,7 @@ public class CoinTransaction implements Serializable{
      *
      * @return the receiver
      */
-    public String getReceiver() {
+    public int getReceiver() {
         return receiver;
     }
 
@@ -64,44 +55,8 @@ public class CoinTransaction implements Serializable{
      *
      * @param receiver the receiver
      */
-    public void setReceiver(String receiver) {
+    public void setReceiver(int receiver) {
         this.receiver = receiver;
-    }
-
-    /**
-     * Gets sender balance.
-     *
-     * @return the sender balance
-     */
-    public double getSenderBalance() {
-        return senderBalance;
-    }
-
-    /**
-     * Sets sender balance.
-     *
-     * @param senderBalance the sender balance
-     */
-    public void setSenderBalance(double senderBalance) {
-        this.senderBalance = senderBalance;
-    }
-
-    /**
-     * Gets receiver balance.
-     *
-     * @return the receiver balance
-     */
-    public double getReceiverBalance() {
-        return receiverBalance;
-    }
-
-    /**
-     * Sets receiver balance.
-     *
-     * @param receiverBalance the receiver balance
-     */
-    public void setReceiverBalance(double receiverBalance) {
-        this.receiverBalance = receiverBalance;
     }
 
     /**
@@ -118,7 +73,7 @@ public class CoinTransaction implements Serializable{
      *
      * @param amount the amount
      */
-    public void setAmount(double amount) {
+    public void setAmount(long amount) {
         this.amount = amount;
     }
 
@@ -169,14 +124,9 @@ public class CoinTransaction implements Serializable{
 
     public static CoinTransaction genRandom(){
         CoinTransaction transaction = new CoinTransaction();
-        RandomStringGenerator generator = new RandomStringGenerator.Builder()
-                     .withinRange('a', 'z')
-                     .build();
-        transaction.setSender(generator.generate(10));
-        transaction.setReceiver(generator.generate(10));
-        transaction.setSenderBalance(RandomUtils.nextDouble(10.0,100.0));
-        transaction.setReceiverBalance(RandomUtils.nextDouble(20.0,60.0));
-        transaction.setAmount(RandomUtils.nextDouble(5.0,10.0));
+        transaction.setSender(RandomUtils.nextInt());
+        transaction.setReceiver(RandomUtils.nextInt());
+        transaction.setAmount(RandomUtils.nextLong());
         transaction.setTimestamp(System.currentTimeMillis());
         transaction.setType("transfer");
         return transaction;
