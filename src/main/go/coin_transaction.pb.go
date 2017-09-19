@@ -12,7 +12,7 @@ It has these top-level messages:
 	WriteRequest
 	CoinSDKServiceResponse
 */
-package cointransaction
+package main
 
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"

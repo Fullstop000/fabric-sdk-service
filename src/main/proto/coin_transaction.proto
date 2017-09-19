@@ -5,7 +5,7 @@ option java_package = "com.yunphant.cointransaction.grpc.cointransaction";
 option java_outer_classname = "CoinTransactionProto";
 option objc_class_prefix = "RTG";
 
-package cointransaction;
+package main;
 
 // The coin transaction struct for both chaincode , client and SDK service
 //message RPCCoinTransaction {
