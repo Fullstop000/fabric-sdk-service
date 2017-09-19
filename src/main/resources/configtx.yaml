@@ -7,7 +7,7 @@ Profiles:
 
             Addresses:
 #                - 0.0.0.0:7050
-                - orderer.myexample.com:7050
+                - orderer.yunphant.coin.com:7050
             # Batch Timeout: The amount of time to wait before creating a batch
             BatchTimeout: 2s
 
@@ -39,13 +39,19 @@ Profiles:
         Consortiums:
             SampleConsortium:
                 Organizations:
+                    - *Org0
                     - *Org1
+                    - *Org2
+                    - *Org3
     ChannelConfig:
         Consortium: SampleConsortium
         Application: 
             <<: *ApplicationDefaults
             Organizations:
+                - *Org0
                 - *Org1
+                - *Org2
+                - *Org3
 
 Organizations:
     # SampleOrg defines an MSP using the sampleconfig.  It should never be used
@@ -58,9 +64,26 @@ Organizations:
         # ID to load the MSP definition as
         ID: OrdererMSP
 
-        # MSPDir is the filesystem path which contains the MSP configuration
-        MSPDir: crypto-config/ordererOrganizations/myexample.com/msp
+        # mspdir is the filesystem path which contains the MSP configuration
+        mspdir: crypto-config/ordererOrganizations/yunphant.coin.com/msp
 
+    - &Org0
+        # DefaultOrg defines the organization which is used in the sampleconfig
+        # of the fabric.git development environment
+        Name: Org0MSP
+
+        # ID to load the MSP definition as
+        ID: Org0MSP
+
+        mspdir: crypto-config/peerOrganizations/org0.yunphant.coin.com/msp
+
+        AnchorPeers:
+            # AnchorPeers defines the location of peers which can be used
+            # for cross org gossip communication.  Note, this value is only
+            # encoded in the genesis block in the Application section context
+#            - Host: 0.0.0.0
+            - Host: peer0.org0.yunphant.coin.com
+              Port: 7051
     - &Org1
         # DefaultOrg defines the organization which is used in the sampleconfig
         # of the fabric.git development environment
@@ -69,14 +92,48 @@ Organizations:
         # ID to load the MSP definition as
         ID: Org1MSP
 
-        MSPDir: crypto-config/peerOrganizations/org1.myexample.com/msp
+        mspdir: crypto-config/peerOrganizations/org1.yunphant.coin.com/msp
 
         AnchorPeers:
             # AnchorPeers defines the location of peers which can be used
             # for cross org gossip communication.  Note, this value is only
             # encoded in the genesis block in the Application section context
 #            - Host: 0.0.0.0
-            - Host: peer0.org1.myexample.com
+            - Host: peer0.org1.yunphant.coin.com
+              Port: 7051
+    - &Org2
+        # DefaultOrg defines the organization which is used in the sampleconfig
+        # of the fabric.git development environment
+        Name: Org2MSP
+
+        # ID to load the MSP definition as
+        ID: Org2MSP
+
+        mspdir: crypto-config/peerOrganizations/org2.yunphant.coin.com/msp
+
+        AnchorPeers:
+            # AnchorPeers defines the location of peers which can be used
+            # for cross org gossip communication.  Note, this value is only
+            # encoded in the genesis block in the Application section context
+#            - Host: 0.0.0.0
+            - Host: peer0.org2.yunphant.coin.com
+              Port: 7051
+    - &Org3
+        # DefaultOrg defines the organization which is used in the sampleconfig
+        # of the fabric.git development environment
+        Name: Org3MSP
+
+        # ID to load the MSP definition as
+        ID: Org3MSP
+
+        mspdir: crypto-config/peerOrganizations/org3.yunphant.coin.com/msp
+
+        AnchorPeers:
+            # AnchorPeers defines the location of peers which can be used
+            # for cross org gossip communication.  Note, this value is only
+            # encoded in the genesis block in the Application section context
+#            - Host: 0.0.0.0
+            - Host: peer0.org3.yunphant.coin.com
               Port: 7051
               
 Application: &ApplicationDefaults

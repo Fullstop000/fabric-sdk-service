@@ -3,7 +3,7 @@ export FABRIC_ROOT=/Users/fullstop000/go/src/github.com/hyperledger/fabric
 OS_ARCH=$(echo "$(uname -s|tr '[:upper:]' '[:lower:]'|sed 's/mingw64_nt.*/windows/')-$(uname -m | sed 's/x86_64/amd64/g')" | awk '{print tolower($0)}')
 
 CHANNEL_NAME=$1
-: ${CHANNEL_NAME:="mychannel"}
+: ${CHANNEL_NAME:="coinchannel"}
 echo $CHANNEL_NAME
 
 function generateCerts (){
@@ -49,16 +49,28 @@ function generateChannelArtifacts() {
 
 	echo
 	echo "#################################################################"
+	echo "#######    Generating anchor peer update for Org0MSP   ##########"
+	echo "#################################################################"
+	$CONFIGTXGEN -profile ChannelConfig -outputAnchorPeersUpdate ./channel-artifacts/Org0MSPanchors.tx -channelID $CHANNEL_NAME -asOrg Org0MSP
+
+    echo
+	echo "#################################################################"
 	echo "#######    Generating anchor peer update for Org1MSP   ##########"
 	echo "#################################################################"
 	$CONFIGTXGEN -profile ChannelConfig -outputAnchorPeersUpdate ./channel-artifacts/Org1MSPanchors.tx -channelID $CHANNEL_NAME -asOrg Org1MSP
 
-	# echo
-	# echo "#################################################################"
-	# echo "#######    Generating anchor peer update for Org2MSP   ##########"
-	# echo "#################################################################"
-	# $CONFIGTXGEN -profile TwoOrgsChannel -outputAnchorPeersUpdate ./channel-artifacts/Org2MSPanchors.tx -channelID $CHANNEL_NAME -asOrg Org2MSP
-	# echo
+    echo
+	echo "#################################################################"
+	echo "#######    Generating anchor peer update for Org2MSP   ##########"
+	echo "#################################################################"
+	$CONFIGTXGEN -profile ChannelConfig -outputAnchorPeersUpdate ./channel-artifacts/Org2MSPanchors.tx -channelID $CHANNEL_NAME -asOrg Org2MSP
+
+    echo
+	echo "#################################################################"
+	echo "#######    Generating anchor peer update for Org3MSP   ##########"
+	echo "#################################################################"
+	$CONFIGTXGEN -profile ChannelConfig -outputAnchorPeersUpdate ./channel-artifacts/Org3MSPanchors.tx -channelID $CHANNEL_NAME -asOrg Org3MSP
+
 }
 generateCerts
 generateChannelArtifacts
