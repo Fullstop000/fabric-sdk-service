@@ -5,7 +5,10 @@ ordererConfig:
     host: localhost
     port: 7050
     mspdir: yunphant.coin.com/msp
+channelName: coinchannel
 orgDirPrefix: src/main/resources/crypto-config/peerOrganizations
+artifactsDir: src/main/resources/channel-artifacts
+tlsEnabled: false
 organizations:
     - name: Org0
       domain: org0.yunphant.coin.com
@@ -24,7 +27,7 @@ organizations:
             port: 6051
     - name: Org1
       domain: org1.yunphant.coin.com
-      mspid: Org0MSP
+      mspid: Org1MSP
 #      adminPrivateKey: users/Admin@org1.yunphant.coin.com/msp/keystore
 #      adminCert: users/Admin@org1.yunphant.coin.com/msp/signcerts/Admin@org1.yunphant.coin.com-cert.pem
       ca:
