@@ -13,28 +13,28 @@ services:
     networks:
       - sdk_net
     container_name: couchdb0
-    image: hyperledger/fabric-couchdb
+    image: hyperledger/fabric-couchdb:${ARCH}-${FABRIC_PEER_FIXTURE_TAG}
     ports:
       - "5984:5984"
   couchdb1:
     networks:
       - sdk_net
     container_name: couchdb1
-    image: hyperledger/fabric-couchdb
+    image: hyperledger/fabric-couchdb:${ARCH}-${FABRIC_PEER_FIXTURE_TAG}
     ports:
       - "6984:5984"
   couchdb2:
     networks:
       - sdk_net
     container_name: couchdb2
-    image: hyperledger/fabric-couchdb
+    image: hyperledger/fabric-couchdb:${ARCH}-${FABRIC_PEER_FIXTURE_TAG}
     ports:
       - "7984:5984"
   couchdb3:
     networks:
       - sdk_net
     container_name: couchdb3
-    image: hyperledger/fabric-couchdb
+    image: hyperledger/fabric-couchdb:${ARCH}-${FABRIC_PEER_FIXTURE_TAG}
     ports:
       - "8984:5984"
 
