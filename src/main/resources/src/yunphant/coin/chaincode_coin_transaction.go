@@ -36,8 +36,11 @@ type YunphantCoinCC struct {
 // 	just for chaincode
 }
 func (c *YunphantCoinCC) Init(stub shim.ChaincodeStubInterface) peer.Response {
-	args := stub.GetArgs()
-	fmt.Printf("Starting init . Args : %v", args)
+	// Init a root user : userID 1
+	err := stub.PutState("1",[]byte("0"))
+	if err != nil {
+		shim.Error(fmt.Sprintf("Error creating root user . err : %s",err.Error()))
+	}
 	return shim.Success(nil)
 }
 
@@ -48,14 +51,14 @@ func (c *YunphantCoinCC) Invoke(stub shim.ChaincodeStubInterface) peer.Response 
 		var userBalance UserBalance
 		err := json.Unmarshal([]byte(args[0]), &userBalance)
 		if err != nil {
-			return shim.Error(fmt.Sprintf("Erroring unmarshal string to UserBalance : %s ,err : %s",args[0],err.Error()))
+			return shim.Error(fmt.Sprintf("Error unmarshaling string to UserBalance : %s ,err : %s",args[0],err.Error()))
 		}
 		return c.createAccount(stub, userBalance)
 	case "addCoinTransaction":
 		var coinTran CoinTransaction
 		err := json.Unmarshal([]byte(args[0]), &coinTran)
 		if err != nil {
-			return shim.Error(fmt.Sprintf("Erroring unmarshal string to CoinTransaction : %s ,err : %s",args[0],err.Error()))
+			return shim.Error(fmt.Sprintf("Error unmarshaling string to CoinTransaction : %s ,err : %s",args[0],err.Error()))
 		}
 		return c.addCoinTransaction(stub,&coinTran)
 	case "queryTransactionRecord":
@@ -91,7 +94,7 @@ func (c *YunphantCoinCC) queryBalance(stub shim.ChaincodeStubInterface, userID s
 func (c *YunphantCoinCC) queryTransactionRecord(stub shim.ChaincodeStubInterface, queryStr string ) peer.Response {
 	res, err := stub.GetQueryResult(queryStr)
 	if err != nil {
-		return shim.Error(fmt.Sprintf("Erroring query couchDB by query string : %s , err : %s",queryStr , err.Error()))
+		return shim.Error(fmt.Sprintf("Error querying couchDB by query string : %s , err : %s",queryStr , err.Error()))
 	}
 	bArrayMemberAlreadyWritten := false
 	var buffer bytes.Buffer
@@ -199,7 +202,7 @@ func (c *YunphantCoinCC) addCoinTransaction(stub shim.ChaincodeStubInterface,coi
 	}
 	err = stub.PutState(key, jsonByte)
 	if err != nil {
-		return shim.Error(fmt.Sprintf("Error create transaction record : %s",err.Error()))
+		return shim.Error(fmt.Sprintf("Error creating transaction record : %s",err.Error()))
 	}
 	return shim.Success([]byte("Success adding coin transaction"))
 }
